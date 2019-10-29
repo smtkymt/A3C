@@ -122,7 +122,7 @@ class MasterAgent():
 
         res_queue = Queue()
 
-        workers = [Worker(self.args, self.state_size, self.action_size, self.global_model, self.opt, res_queue, i, game_name=self.game_name, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
+        workers = [Worker(self.args.max_eps, self.args.update_freq, self.args.gamma, self.state_size, self.action_size, self.global_model, self.opt, res_queue, i, game_name=self.game_name, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
 
         for i, worker in enumerate(workers):
             print("Starting worker {}".format(i))
@@ -196,13 +196,13 @@ class Worker(threading.Thread):
     best_score = 0
     save_lock = threading.Lock()
 
-    def __init__(self, args, state_size, action_size, global_model, opt, result_queue, idx, game_name='CartPole-v0', save_dir='/tmp'):
+    def __init__(self, max_eps, update_freq, gamma, state_size, action_size, global_model, opt, result_queue, idx, game_name='CartPole-v0', save_dir='/tmp'):
 
         super(Worker, self).__init__()
 
-        self.args = args
-
-        self.max_eps = args.max_eps
+        self.max_eps = max_eps
+        self.update_freq = update_freq
+        self.gamma = gamma
 
         self.state_size = state_size
         self.action_size = action_size
@@ -241,11 +241,11 @@ class Worker(threading.Thread):
                 ep_reward += reward
                 mem.store(current_state, action, reward)
 
-                if time_count == self.args.update_freq or done:
+                if time_count == self.update_freq or done:
                     # Calculate gradient wrt to local model. We do so by tracking the
                     # variables involved in computing the loss by using tf.GradientTape
                     with tf.GradientTape() as tape:
-                        total_loss = self.compute_loss(done, new_state, mem, self.args.gamma)
+                        total_loss = self.compute_loss(done, new_state, mem, self.gamma)
                     self.ep_loss += total_loss
                     # Calculate local gradients
                     grads = tape.gradient(total_loss, self.local_model.trainable_weights)
