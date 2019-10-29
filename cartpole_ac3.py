@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 GAME_NAME = 'CartPole-v0'
 
 # Runs a random agent for baseline
-def run_random(game_name, max_eps):
+def run_random(max_eps):
     env = gym.make(GAME_NAME)
     global_moving_average_reward = 0
     res_queue = Queue()
