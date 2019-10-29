@@ -60,7 +60,7 @@ class ActorCriticModel(keras.Model):
         return logits, values
 
 
-class MasterAgent:
+class A3CAgent:
 
     def __init__(self, save_dir, lr):
 

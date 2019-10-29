@@ -1,7 +1,7 @@
 import argparse
 from queue import Queue
 import gym
-from a3c import MasterAgent, report
+from a3c import A3CAgent, report
 
 # Runs a random agent for baseline
 def run_random(max_eps):
@@ -44,9 +44,9 @@ if __name__ == '__main__':
 
     else:
 
-        master = MasterAgent(args.save_dir, args.lr)
+        agent = A3CAgent(args.save_dir, args.lr)
             
         if args.train:
-            master.train(args.algorithm, args.max_eps, args.update_freq, args.gamma)
+            agent.train(args.max_eps, args.update_freq, args.gamma)
         else:
-            master.play()
+            agent.play()
