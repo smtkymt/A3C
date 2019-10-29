@@ -13,8 +13,6 @@ import tensorflow as tf
 from tensorflow.python import keras
 from tensorflow.python.keras import layers
 
-tf.compat.v1.enable_eager_execution()
-
 class ActorCriticModel(keras.Model):
   def __init__(self, state_size, action_size):
     super(ActorCriticModel, self).__init__()
