@@ -30,10 +30,10 @@ def record(episode, max_episodes, episode_reward, worker_idx, global_ep_reward, 
     else:
         global_ep_reward = global_ep_reward * 0.99 + episode_reward * 0.01
     print(
-            f"Episode: {episode} / {max_episodes} | "
+            f"Episode: {episode:4d} / {max_episodes:4d} | "
             f"Moving Average Reward: {int(global_ep_reward):3d} | "
-            f"Episode Reward: {int(episode_reward):3d} | "
-            f"Loss: {int(total_loss / float(num_steps) * 1000) / 1000:1.3f} | "
+            f"Episode Reward: {int(episode_reward):4d} | "
+            f"Loss: {int(total_loss / float(num_steps) * 1000) / 1000:6.3f} | "
             f"Steps: {num_steps:4d} | "
             f"Worker: {worker_idx}"
     )
