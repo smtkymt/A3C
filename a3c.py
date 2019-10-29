@@ -95,12 +95,9 @@ class RandomAgent:
 
 class MasterAgent():
 
-    def __init__(self, args):
-
-        self.args = args
+    def __init__(self, save_dir, lr):
 
         self.game_name = 'CartPole-v0'
-        save_dir = args.save_dir
         self.save_dir = save_dir
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
@@ -108,7 +105,7 @@ class MasterAgent():
         env = gym.make(self.game_name)
         self.state_size = env.observation_space.shape[0]
         self.action_size = env.action_space.n
-        self.opt = tf.compat.v1.train.AdamOptimizer(args.lr, use_locking=True)
+        self.opt = tf.compat.v1.train.AdamOptimizer(lr, use_locking=True)
         print(self.state_size, self.action_size)
 
         self.global_model = ActorCriticModel(self.state_size, self.action_size)  # global network

@@ -13,7 +13,7 @@ parser.add_argument('--save-dir', default='/tmp/', type=str, help='Directory in 
 
 args = parser.parse_args()
 
-master = MasterAgent(args)
+master = MasterAgent(args.save_dir, args.lr)
     
 if args.train:
     master.train(args.algorithm, args.max_eps, args.update_freq, args.gamma)
