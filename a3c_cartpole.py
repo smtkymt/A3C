@@ -59,10 +59,10 @@ def record(episode,
     global_ep_reward = global_ep_reward * 0.99 + episode_reward * 0.01
   print(
       f"Episode: {episode} / {max_episodes} | "
-      f"Moving Average Reward: {int(global_ep_reward)} | "
-      f"Episode Reward: {int(episode_reward)} | "
-      f"Loss: {int(total_loss / float(num_steps) * 1000) / 1000} | "
-      f"Steps: {num_steps} | "
+      f"Moving Average Reward: {int(global_ep_reward):3d} | "
+      f"Episode Reward: {int(episode_reward):3d} | "
+      f"Loss: {int(total_loss / float(num_steps) * 1000) / 1000:1.3f} | "
+      f"Steps: {num_steps:4d} | "
       f"Worker: {worker_idx}"
   )
   result_queue.put(global_ep_reward)
