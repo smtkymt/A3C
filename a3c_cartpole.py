@@ -10,8 +10,8 @@ import argparse
 import matplotlib.pyplot as plt
 
 import tensorflow as tf
-from tensorflow.python import keras
-from tensorflow.python.keras import layers
+from tensorflow import keras
+from tensorflow.keras import layers
 
 class ActorCriticModel(keras.Model):
   def __init__(self, state_size, action_size):
