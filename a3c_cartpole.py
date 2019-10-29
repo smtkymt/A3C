@@ -9,30 +9,11 @@ from queue import Queue
 import argparse
 import matplotlib.pyplot as plt
 
-
 import tensorflow as tf
 from tensorflow.python import keras
 from tensorflow.python.keras import layers
 
 tf.compat.v1.enable_eager_execution()
-
-parser = argparse.ArgumentParser(description='Run A3C algorithm on the game '
-                                             'Cartpole.')
-parser.add_argument('--algorithm', default='a3c', type=str,
-                    help='Choose between \'a3c\' and \'random\'.')
-parser.add_argument('--train', dest='train', action='store_true',
-                    help='Train our model.')
-parser.add_argument('--lr', default=0.001,
-                    help='Learning rate for the shared optimizer.')
-parser.add_argument('--update-freq', default=20, type=int,
-                    help='How often to update the global model.')
-parser.add_argument('--max-eps', default=1000, type=int,
-                    help='Global maximum number of episodes to run.')
-parser.add_argument('--gamma', default=0.99,
-                    help='Discount factor of rewards.')
-parser.add_argument('--save-dir', default='/tmp/', type=str,
-                    help='Directory in which you desire to save the model.')
-args = parser.parse_args()
 
 class ActorCriticModel(keras.Model):
   def __init__(self, state_size, action_size):
@@ -53,6 +34,7 @@ class ActorCriticModel(keras.Model):
     return logits, values
 
 def record(episode,
+           max_episodes,
            episode_reward,
            worker_idx,
            global_ep_reward,
@@ -63,6 +45,7 @@ def record(episode,
 
   Arguments:
     episode: Current episode
+    max_episodes: Total number of episodes
     episode_reward: Reward accumulated over the current episode
     worker_idx: Which thread (worker)
     global_ep_reward: The moving average of the global reward
@@ -75,7 +58,7 @@ def record(episode,
   else:
     global_ep_reward = global_ep_reward * 0.99 + episode_reward * 0.01
   print(
-      f"Episode: {episode} | "
+      f"Episode: {episode} / {max_episodes} | "
       f"Moving Average Reward: {int(global_ep_reward)} | "
       f"Episode Reward: {int(episode_reward)} | "
       f"Loss: {int(total_loss / float(num_steps) * 1000) / 1000} | "
@@ -113,6 +96,7 @@ class RandomAgent:
         reward_sum += reward
       # Record statistics
       self.global_moving_average_reward = record(episode,
+                                                 self.max_episodes,
                                                  reward_sum,
                                                  0,
                                                  self.global_moving_average_reward,
@@ -297,7 +281,7 @@ class Worker(threading.Thread):
 
           if done:  # done and print information
             Worker.global_moving_average_reward = \
-              record(Worker.global_episode, ep_reward, self.worker_idx,
+              record(Worker.global_episode, args.max_eps, ep_reward, self.worker_idx,
                      Worker.global_moving_average_reward, self.result_queue,
                      self.ep_loss, ep_steps)
             # We must use a lock to save our model and to print to prevent data races.
@@ -359,9 +343,30 @@ class Worker(threading.Thread):
 
 
 if __name__ == '__main__':
-  print(args)
-  master = MasterAgent()
-  if args.train:
-    master.train()
-  else:
-    master.play()
+
+    parser = argparse.ArgumentParser(description='Run A3C algorithm on the game '
+                                             'Cartpole.')
+    parser.add_argument('--algorithm', default='a3c', type=str,
+                    help='Choose between \'a3c\' and \'random\'.')
+    parser.add_argument('--train', dest='train', action='store_true',
+                        help='Train our model.')
+    parser.add_argument('--lr', default=0.001,
+                        help='Learning rate for the shared optimizer.')
+    parser.add_argument('--update-freq', default=20, type=int,
+                        help='How often to update the global model.')
+    parser.add_argument('--max-eps', default=1000, type=int,
+                        help='Global maximum number of episodes to run.')
+    parser.add_argument('--gamma', default=0.99,
+                        help='Discount factor of rewards.')
+    parser.add_argument('--save-dir', default='/tmp/', type=str,
+                        help='Directory in which you desire to save the model.')
+    args = parser.parse_args()
+
+    print(args)
+
+    master = MasterAgent()
+      
+    if args.train:
+        master.train()
+    else:
+        master.play()
