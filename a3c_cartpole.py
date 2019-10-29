@@ -16,6 +16,6 @@ args = parser.parse_args()
 master = MasterAgent(args)
     
 if args.train:
-    master.train()
+    master.train(args.algorithm)
 else:
     master.play()

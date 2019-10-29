@@ -114,15 +114,17 @@ class MasterAgent():
         self.global_model = ActorCriticModel(self.state_size, self.action_size)  # global network
         self.global_model(tf.convert_to_tensor(value=np.random.random((1, self.state_size)), dtype=tf.float32))
 
-    def train(self):
-        if self.args.algorithm == 'random':
+    def train(self, algorithm):
+
+        if algorithm == 'random':
             random_agent = RandomAgent(self.game_name, self.args.max_eps)
             random_agent.run()
             return
 
         res_queue = Queue()
 
-        workers = [Worker(self.args.max_eps, self.args.update_freq, self.args.gamma, self.state_size, self.action_size, self.global_model, self.opt, res_queue, i, game_name=self.game_name, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
+        workers = [Worker(self.args.max_eps, self.args.update_freq, self.args.gamma, self.state_size, self.action_size, self.global_model, self.opt, 
+            res_queue, i, game_name=self.game_name, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
 
         for i, worker in enumerate(workers):
             print("Starting worker {}".format(i))
@@ -140,8 +142,7 @@ class MasterAgent():
         plt.plot(moving_average_rewards)
         plt.ylabel('Moving average ep reward')
         plt.xlabel('Step')
-        plt.savefig(os.path.join(self.save_dir,
-                                                         '{} Moving Average.png'.format(self.game_name)))
+        plt.savefig(os.path.join(self.save_dir, '{} Moving Average.png'.format(self.game_name)))
         plt.show()
 
     def play(self):
