@@ -14,6 +14,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 class ActorCriticModel(keras.Model):
+
   def __init__(self, state_size, action_size):
     super(ActorCriticModel, self).__init__()
     self.state_size = state_size
