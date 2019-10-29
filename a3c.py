@@ -12,7 +12,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
-def record(episode, max_episodes, episode_reward, worker_idx, global_ep_reward, result_queue, total_loss, num_steps):
+def report(episode, max_episodes, episode_reward, worker_idx, global_ep_reward, result_queue, total_loss, num_steps):
     """Helper function to store score and print statistics.
 
     Arguments:
@@ -60,38 +60,6 @@ class ActorCriticModel(keras.Model):
         return logits, values
 
 
-class RandomAgent:
-    """Random Agent that will play the specified game
-
-        Arguments:
-            env_name: Name of the environment to be played
-            max_eps: Maximum number of episodes to run agent for.
-    """
-    def __init__(self, env_name):
-        self.env = gym.make(env_name)
-        self.global_moving_average_reward = 0
-        self.res_queue = Queue()
-
-    def train(self, max_eps):
-        reward_avg = 0
-        for episode in range(max_eps):
-            done = False
-            self.env.reset()
-            reward_sum = 0.0
-            steps = 0
-            while not done:
-                # Sample randomly from the action space and step
-                _, reward, done, _ = self.env.step(self.env.action_space.sample())
-                steps += 1
-                reward_sum += reward
-            # Record statistics
-            self.global_moving_average_reward = record(episode, max_eps, reward_sum, 0, self.global_moving_average_reward, self.res_queue, 0, steps) 
-            reward_avg += reward_sum
-        final_avg = reward_avg / float(max_eps)
-        print("Average score across {} episodes: {}".format(max_eps, final_avg))
-        return final_avg
-
-
 class MasterAgent:
 
     def __init__(self, save_dir, lr):
@@ -110,12 +78,7 @@ class MasterAgent:
         self.global_model = ActorCriticModel(self.state_size, self.action_size)  # global network
         self.global_model(tf.convert_to_tensor(value=np.random.random((1, self.state_size)), dtype=tf.float32))
 
-    def train(self, algorithm, max_eps, update_freq, gamma):
-
-        if algorithm == 'random':
-            random_agent = RandomAgent(self.game_name)
-            random_agent.train(max_eps)
-            return
+    def train(self, max_eps, update_freq, gamma):
 
         res_queue = Queue()
 
@@ -259,7 +222,7 @@ class Worker(threading.Thread):
 
                     if done:    # done and print information
                         Worker.global_moving_average_reward = \
-                            record(Worker.global_episode, self.max_eps, ep_reward, self.worker_idx, Worker.global_moving_average_reward, self.result_queue, self.ep_loss, ep_steps)
+                            report(Worker.global_episode, self.max_eps, ep_reward, self.worker_idx, Worker.global_moving_average_reward, self.result_queue, self.ep_loss, ep_steps)
                         # We must use a lock to save our model and to print to prevent data races.
                         if ep_reward > Worker.best_score:
                             with Worker.save_lock:
