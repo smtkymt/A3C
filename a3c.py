@@ -187,7 +187,6 @@ class Memory:
         self.actions = []
         self.rewards = []
 
-
 class Worker(threading.Thread):
 
     # Set up global variables across different threads
@@ -202,6 +201,8 @@ class Worker(threading.Thread):
         super(Worker, self).__init__()
 
         self.args = args
+
+        self.max_eps = args.max_eps
 
         self.state_size = state_size
         self.action_size = action_size
@@ -218,7 +219,7 @@ class Worker(threading.Thread):
     def run(self):
         total_step = 1
         mem = Memory()
-        while Worker.global_episode < self.args.max_eps:
+        while Worker.global_episode < self.max_eps:
             current_state = self.env.reset()
             mem.clear()
             ep_reward = 0.
@@ -258,7 +259,7 @@ class Worker(threading.Thread):
 
                     if done:    # done and print information
                         Worker.global_moving_average_reward = \
-                            record(Worker.global_episode, self.args.max_eps, ep_reward, self.worker_idx, Worker.global_moving_average_reward, self.result_queue, self.ep_loss, ep_steps)
+                            record(Worker.global_episode, self.max_eps, ep_reward, self.worker_idx, Worker.global_moving_average_reward, self.result_queue, self.ep_loss, ep_steps)
                         # We must use a lock to save our model and to print to prevent data races.
                         if ep_reward > Worker.best_score:
                             with Worker.save_lock:
