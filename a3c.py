@@ -114,16 +114,16 @@ class MasterAgent():
         self.global_model = ActorCriticModel(self.state_size, self.action_size)  # global network
         self.global_model(tf.convert_to_tensor(value=np.random.random((1, self.state_size)), dtype=tf.float32))
 
-    def train(self, algorithm):
+    def train(self, algorithm, max_eps, update_freq, gamma):
 
         if algorithm == 'random':
-            random_agent = RandomAgent(self.game_name, self.args.max_eps)
+            random_agent = RandomAgent(self.game_name, max_eps)
             random_agent.run()
             return
 
         res_queue = Queue()
 
-        workers = [Worker(self.args.max_eps, self.args.update_freq, self.args.gamma, self.state_size, self.action_size, self.global_model, self.opt, 
+        workers = [Worker(max_eps, update_freq, gamma, self.state_size, self.action_size, self.global_model, self.opt, 
             res_queue, i, game_name=self.game_name, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
 
         for i, worker in enumerate(workers):
