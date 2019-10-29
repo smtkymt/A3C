@@ -6,7 +6,6 @@ import gym
 import multiprocessing
 import numpy as np
 from queue import Queue
-import matplotlib.pyplot as plt
 
 import tensorflow as tf
 from tensorflow import keras
@@ -98,11 +97,7 @@ class A3CAgent:
                 break
         [w.join() for w in workers]
 
-        plt.plot(moving_average_rewards)
-        plt.ylabel('Moving average ep reward')
-        plt.xlabel('Step')
-        plt.savefig(os.path.join(self.save_dir, '{} Moving Average.png'.format(self.game_name)))
-        plt.show()
+        return moving_average_rewards
 
     def play(self):
         env = gym.make(self.game_name).unwrapped

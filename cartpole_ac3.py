@@ -1,11 +1,15 @@
+import os
 import argparse
 from queue import Queue
 import gym
 from a3c import A3CAgent, report
+import matplotlib.pyplot as plt
+
+GAME_NAME = 'CartPole-v0'
 
 # Runs a random agent for baseline
 def run_random(game_name, max_eps):
-    env = gym.make('CartPole-v0')
+    env = gym.make(GAME_NAME)
     global_moving_average_reward = 0
     res_queue = Queue()
     reward_avg = 0
@@ -44,9 +48,18 @@ if __name__ == '__main__':
 
     else:
 
-        agent = A3CAgent('CartPole-v0', args.save_dir, args.lr)
+        agent = A3CAgent(GAME_NAME, args.save_dir, args.lr)
             
         if args.train:
-            agent.train(args.max_eps, args.update_freq, args.gamma)
+
+            moving_average_rewards = agent.train(args.max_eps, args.update_freq, args.gamma)
+
+            plt.plot(moving_average_rewards)
+            plt.ylabel('Moving average ep reward')
+            plt.xlabel('Step')
+            plt.savefig(os.path.join(args.save_dir, '{} Moving Average.png'.format(GAME_NAME)))
+            plt.show()
+
         else:
+
             agent.play()
