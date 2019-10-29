@@ -67,15 +67,14 @@ class RandomAgent:
             env_name: Name of the environment to be played
             max_eps: Maximum number of episodes to run agent for.
     """
-    def __init__(self, env_name, max_eps):
+    def __init__(self, env_name):
         self.env = gym.make(env_name)
-        self.max_episodes = max_eps
         self.global_moving_average_reward = 0
         self.res_queue = Queue()
 
-    def run(self):
+    def train(self, max_eps):
         reward_avg = 0
-        for episode in range(self.max_episodes):
+        for episode in range(max_eps):
             done = False
             self.env.reset()
             reward_sum = 0.0
@@ -93,7 +92,7 @@ class RandomAgent:
         return final_avg
 
 
-class MasterAgent():
+class MasterAgent:
 
     def __init__(self, save_dir, lr):
 
@@ -114,8 +113,8 @@ class MasterAgent():
     def train(self, algorithm, max_eps, update_freq, gamma):
 
         if algorithm == 'random':
-            random_agent = RandomAgent(self.game_name, max_eps)
-            random_agent.run()
+            random_agent = RandomAgent(self.game_name)
+            random_agent.train(max_eps)
             return
 
         res_queue = Queue()
@@ -148,10 +147,16 @@ class MasterAgent():
         model = self.global_model
         model_path = os.path.join(self.save_dir, 'model_{}.h5'.format(self.game_name))
         print('Loading model from: {}'.format(model_path))
-        model.load_weights(model_path)
+        try:
+            model.load_weights(model_path)
+        except:
+            print('Model not found; please train first')
+            exit(0)
         done = False
         step_counter = 0
         reward_sum = 0
+
+        exit(0)
 
         try:
             while not done:
@@ -167,7 +172,6 @@ class MasterAgent():
             print("Received Keyboard Interrupt. Shutting down.")
         finally:
             env.close()
-
 
 class Memory:
     def __init__(self):
@@ -263,10 +267,7 @@ class Worker(threading.Thread):
                             with Worker.save_lock:
                                 print("Saving best model to {}, "
                                             "episode score: {}".format(self.save_dir, ep_reward))
-                                self.global_model.save_weights(
-                                        os.path.join(self.save_dir,
-                                                                 'model_{}.h5'.format(self.game_name))
-                                )
+                                self.global_model.save_weights( os.path.join(self.save_dir, 'model_{}.h5'.format(self.game_name)))
                                 Worker.best_score = ep_reward
                         Worker.global_episode += 1
                 ep_steps += 1
