@@ -85,10 +85,10 @@ class RandomAgent:
                 steps += 1
                 reward_sum += reward
             # Record statistics
-            self.global_moving_average_reward = record(episode, self.max_episodes, reward_sum, 0, self.global_moving_average_reward, self.res_queue, 0, steps) 
+            self.global_moving_average_reward = record(episode, max_eps, reward_sum, 0, self.global_moving_average_reward, self.res_queue, 0, steps) 
             reward_avg += reward_sum
-        final_avg = reward_avg / float(self.max_episodes)
-        print("Average score across {} episodes: {}".format(self.max_episodes, final_avg))
+        final_avg = reward_avg / float(max_eps)
+        print("Average score across {} episodes: {}".format(max_eps, final_avg))
         return final_avg
 
 
@@ -155,8 +155,6 @@ class MasterAgent:
         done = False
         step_counter = 0
         reward_sum = 0
-
-        exit(0)
 
         try:
             while not done:
