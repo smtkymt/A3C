@@ -62,9 +62,9 @@ class ActorCriticModel(keras.Model):
 
 class A3CAgent:
 
-    def __init__(self, save_dir, lr):
+    def __init__(self, game_name, save_dir, lr):
 
-        self.game_name = 'CartPole-v0'
+        self.game_name = game_name
         self.save_dir = save_dir
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)

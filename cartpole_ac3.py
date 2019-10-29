@@ -4,7 +4,7 @@ import gym
 from a3c import A3CAgent, report
 
 # Runs a random agent for baseline
-def run_random(max_eps):
+def run_random(game_name, max_eps):
     env = gym.make('CartPole-v0')
     global_moving_average_reward = 0
     res_queue = Queue()
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     else:
 
-        agent = A3CAgent(args.save_dir, args.lr)
+        agent = A3CAgent('CartPole-v0', args.save_dir, args.lr)
             
         if args.train:
             agent.train(args.max_eps, args.update_freq, args.gamma)
