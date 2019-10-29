@@ -13,33 +13,7 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
-class ActorCriticModel(keras.Model):
-
-    def __init__(self, state_size, action_size):
-        super(ActorCriticModel, self).__init__()
-        self.state_size = state_size
-        self.action_size = action_size
-        self.dense1 = layers.Dense(100, activation='relu')
-        self.policy_logits = layers.Dense(action_size)
-        self.dense2 = layers.Dense(100, activation='relu')
-        self.values = layers.Dense(1)
-
-    def call(self, inputs):
-        # Forward pass
-        x = self.dense1(inputs)
-        logits = self.policy_logits(x)
-        v1 = self.dense2(inputs)
-        values = self.values(v1)
-        return logits, values
-
-def record(episode,
-                     max_episodes,
-                     episode_reward,
-                     worker_idx,
-                     global_ep_reward,
-                     result_queue,
-                     total_loss,
-                     num_steps):
+def record(episode, max_episodes, episode_reward, worker_idx, global_ep_reward, result_queue, total_loss, num_steps):
     """Helper function to store score and print statistics.
 
     Arguments:
@@ -66,6 +40,25 @@ def record(episode,
     )
     result_queue.put(global_ep_reward)
     return global_ep_reward
+
+class ActorCriticModel(keras.Model):
+
+    def __init__(self, state_size, action_size):
+        super(ActorCriticModel, self).__init__()
+        self.state_size = state_size
+        self.action_size = action_size
+        self.dense1 = layers.Dense(100, activation='relu')
+        self.policy_logits = layers.Dense(action_size)
+        self.dense2 = layers.Dense(100, activation='relu')
+        self.values = layers.Dense(1)
+
+    def call(self, inputs):
+        # Forward pass
+        x = self.dense1(inputs)
+        logits = self.policy_logits(x)
+        v1 = self.dense2(inputs)
+        values = self.values(v1)
+        return logits, values
 
 
 class RandomAgent:
@@ -94,13 +87,7 @@ class RandomAgent:
                 steps += 1
                 reward_sum += reward
             # Record statistics
-            self.global_moving_average_reward = record(episode,
-                                                                                                 self.max_episodes,
-                                                                                                 reward_sum,
-                                                                                                 0,
-                                                                                                 self.global_moving_average_reward,
-                                                                                                 self.res_queue, 0, steps)
-
+            self.global_moving_average_reward = record(episode, self.max_episodes, reward_sum, 0, self.global_moving_average_reward, self.res_queue, 0, steps) 
             reward_avg += reward_sum
         final_avg = reward_avg / float(self.max_episodes)
         print("Average score across {} episodes: {}".format(self.max_episodes, final_avg))
@@ -132,12 +119,7 @@ class MasterAgent():
 
         res_queue = Queue()
 
-        workers = [Worker(self.state_size,
-                                            self.action_size,
-                                            self.global_model,
-                                            self.opt, res_queue,
-                                            i, game_name=self.game_name,
-                                            save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
+        workers = [Worker(self.state_size, self.action_size, self.global_model, self.opt, res_queue, i, game_name=self.game_name, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
 
         for i, worker in enumerate(workers):
             print("Starting worker {}".format(i))
@@ -204,6 +186,7 @@ class Memory:
 
 
 class Worker(threading.Thread):
+
     # Set up global variables across different threads
     global_episode = 0
     # Moving average reward
@@ -211,16 +194,10 @@ class Worker(threading.Thread):
     best_score = 0
     save_lock = threading.Lock()
 
-    def __init__(self,
-                             state_size,
-                             action_size,
-                             global_model,
-                             opt,
-                             result_queue,
-                             idx,
-                             game_name='CartPole-v0',
-                             save_dir='/tmp'):
+    def __init__(self, state_size, action_size, global_model, opt, result_queue, idx, game_name='CartPole-v0', save_dir='/tmp'):
+
         super(Worker, self).__init__()
+
         self.state_size = state_size
         self.action_size = action_size
         self.result_queue = result_queue
@@ -301,11 +278,8 @@ class Worker(threading.Thread):
                 total_step += 1
         self.result_queue.put(None)
 
-    def compute_loss(self,
-                                     done,
-                                     new_state,
-                                     memory,
-                                     gamma=0.99):
+    def compute_loss(self, done, new_state, memory, gamma=0.99):
+
         if done:
             reward_sum = 0.  # terminal
         else:
@@ -333,8 +307,7 @@ class Worker(threading.Thread):
         policy = tf.nn.softmax(logits)
         entropy = tf.nn.softmax_cross_entropy_with_logits(labels=policy, logits=logits)
 
-        policy_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=memory.actions,
-                                                                                                                                 logits=logits)
+        policy_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=memory.actions, logits=logits)
         policy_loss *= tf.stop_gradient(advantage)
         policy_loss -= 0.01 * entropy
         total_loss = tf.reduce_mean(input_tensor=(0.5 * value_loss + policy_loss))
@@ -343,25 +316,15 @@ class Worker(threading.Thread):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Run A3C algorithm on the game '
-                                                                                     'Cartpole.')
-    parser.add_argument('--algorithm', default='a3c', type=str,
-                                    help='Choose between \'a3c\' and \'random\'.')
-    parser.add_argument('--train', dest='train', action='store_true',
-                                            help='Train our model.')
-    parser.add_argument('--lr', default=0.001,
-                                            help='Learning rate for the shared optimizer.')
-    parser.add_argument('--update-freq', default=20, type=int,
-                                            help='How often to update the global model.')
-    parser.add_argument('--max-eps', default=1000, type=int,
-                                            help='Global maximum number of episodes to run.')
-    parser.add_argument('--gamma', default=0.99,
-                                            help='Discount factor of rewards.')
-    parser.add_argument('--save-dir', default='/tmp/', type=str,
-                                            help='Directory in which you desire to save the model.')
+    parser = argparse.ArgumentParser(description='Run A3C algorithm on the game Cartpole.')
+    parser.add_argument('--algorithm', default='a3c', type=str, help='Choose between \'a3c\' and \'random\'.')
+    parser.add_argument('--train', dest='train', action='store_true', help='Train our model.')
+    parser.add_argument('--lr', default=0.001, help='Learning rate for the shared optimizer.')
+    parser.add_argument('--update-freq', default=20, type=int, help='How often to update the global model.')
+    parser.add_argument('--max-eps', default=1000, type=int, help='Global maximum number of episodes to run.')
+    parser.add_argument('--gamma', default=0.99, help='Discount factor of rewards.')
+    parser.add_argument('--save-dir', default='/tmp/', type=str, help='Directory in which to save the model.')
     args = parser.parse_args()
-
-    print(args)
 
     master = MasterAgent()
         
