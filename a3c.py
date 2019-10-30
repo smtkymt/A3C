@@ -61,7 +61,7 @@ class ActorCriticModel(keras.Model):
 
 class A3CAgent:
 
-    def __init__(self, game_name, save_dir, lr):
+    def __init__(self, env_factory, game_name, save_dir, lr):
 
         self.game_name = game_name
         self.save_dir = save_dir

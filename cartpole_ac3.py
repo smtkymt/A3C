@@ -65,7 +65,7 @@ if __name__ == '__main__':
 
     else:
 
-        agent = A3CAgent(GAME_NAME, args.save_dir, args.lr)
+        agent = A3CAgent(factory, GAME_NAME, args.save_dir, args.lr)
             
         if args.train:
 
