@@ -101,7 +101,7 @@ class A3CAgent:
         return moving_average_rewards
 
     def play(self):
-        env = gym.make(self.game_name).unwrapped
+        env = self.env_factory.createEnvironment().unwrapped
         state = env.reset()
         model = self.global_model
         model_path = os.path.join(self.save_dir, 'model_{}.h5'.format(self.game_name))
