@@ -61,14 +61,15 @@ class ActorCriticModel(keras.Model):
 
 class A3CAgent:
 
-    def __init__(self, env_factory, game_name, save_dir, lr):
+    def __init__(self, env_factory, save_dir, lr):
 
-        self.game_name = game_name
+        self.env_factory = env_factory
+        self.game_name = env_factory.getName()
         self.save_dir = save_dir
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        env = env_factory.createEnvironment() #gym.make(self.game_name)
+        env = env_factory.createEnvironment() 
         self.state_size = env.observation_space.shape[0]
         self.action_size = env.action_space.n
         self.opt = tf.compat.v1.train.AdamOptimizer(lr, use_locking=True)
