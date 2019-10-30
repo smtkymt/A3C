@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 GAME_NAME = 'CartPole-v0'
 
 # Runs a random agent for baseline
-def run_random(max_eps):
-    env = gym.make(GAME_NAME)
+def run_random(env_factory, max_eps):
+    env = env_factory.createEnvironment()
     global_moving_average_reward = 0
     res_queue = Queue()
     reward_avg = 0
@@ -29,6 +29,21 @@ def run_random(max_eps):
     final_avg = reward_avg / float(max_eps)
     print("Average score across {} episodes: {}".format(max_eps, final_avg))
 
+# A factory class for generating gym environments
+class EnvironmentFactory:
+
+    def __init__(self, name):
+
+        self.name = name
+
+    def createEnvironment(self):
+
+        return gym.make(self.name)
+
+    def getName(self):
+
+        return self.name
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Run A3C algorithm on the game Cartpole.')
@@ -42,9 +57,11 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
+    factory = EnvironmentFactory(GAME_NAME)
+
     if args.algorithm == 'random':
 
-        run_random(args.max_eps)
+        run_random(factory, args.max_eps)
 
     else:
 
