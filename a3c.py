@@ -68,7 +68,7 @@ class A3CAgent:
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        env = gym.make(self.game_name)
+        env = env_factory.createEnvironment() #gym.make(self.game_name)
         self.state_size = env.observation_space.shape[0]
         self.action_size = env.action_space.n
         self.opt = tf.compat.v1.train.AdamOptimizer(lr, use_locking=True)
