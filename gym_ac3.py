@@ -52,6 +52,7 @@ if __name__ == '__main__':
             plt.plot(moving_average_rewards)
             plt.ylabel('Moving average ep reward')
             plt.xlabel('Step')
+            plt.title(args.game)
             plt.savefig(os.path.join(args.save_dir, '{} Moving Average.png'.format(args.game)))
             plt.show()
 
