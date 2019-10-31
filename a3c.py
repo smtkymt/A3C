@@ -2,7 +2,6 @@ import os
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 import threading
-import gym
 import multiprocessing
 import numpy as np
 from queue import Queue
@@ -171,7 +170,7 @@ class Worker(threading.Thread):
         self.local_model = ActorCriticModel(self.state_size, self.action_size)
         self.worker_idx = idx
         self.game_name = game_name
-        self.env = gym.make(self.game_name).unwrapped
+        self.env = env_factory.createEnvironment().unwrapped
         self.save_dir = save_dir
         self.ep_loss = 0.0
 
