@@ -5,7 +5,5 @@ I adapted his [CartPole code](https://github.com/tensorflow/models/blob/master/r
 
 1. Translated the code to TensorFlow 2.0.
 
-2. Moved the test script into its own [module](https://github.com/simondlevy/a3c/blob/master/gym_ac3.py).
-
-3. Added support for games other than CartPole.
+2. Added support for games other than CartPole.
 
