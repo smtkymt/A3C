@@ -27,13 +27,13 @@ def run_random(env_factory, max_eps):
             steps += 1
             reward_sum += reward
         # Record statistics
-        global_moving_average_reward = report(episode, max_eps, reward_sum, 0, global_moving_average_reward, res_queue, 0, steps) 
+        global_moving_average_reward = _report(episode, max_eps, reward_sum, 0, global_moving_average_reward, res_queue, 0, steps) 
         reward_avg += reward_sum
     final_avg = reward_avg / float(max_eps)
     print('Average score across {} episodes: {}'.format(max_eps, final_avg))
 
 
-def report(episode, max_episodes, episode_reward, worker_idx, global_ep_reward, result_queue, total_loss, num_steps):
+def _report(episode, max_episodes, episode_reward, worker_idx, global_ep_reward, result_queue, total_loss, num_steps):
     '''Helper function to store score and print statistics.
 
     Arguments:
@@ -56,15 +56,15 @@ def report(episode, max_episodes, episode_reward, worker_idx, global_ep_reward, 
             f'Episode Reward: {int(episode_reward):4d} | '
             f'Loss: {int(total_loss / float(num_steps) * 1000) / 1000:6.3f} | '
             f'Steps: {num_steps:4d} | '
-            f'Worker: {worker_idx}'
+            f'_Worker: {worker_idx}'
     )
     result_queue.put(global_ep_reward)
     return global_ep_reward
 
-class ActorCriticModel(keras.Model):
+class _ActorCriticModel(keras.Model):
 
     def __init__(self, state_size, action_size):
-        super(ActorCriticModel, self).__init__()
+        super(_ActorCriticModel, self).__init__()
         self.state_size = state_size
         self.action_size = action_size
         self.dense1 = layers.Dense(100, activation='relu')
@@ -97,14 +97,14 @@ class A3CAgent:
         self.opt = tf.compat.v1.train.AdamOptimizer(lr, use_locking=True)
         print(self.state_size, self.action_size)
 
-        self.global_model = ActorCriticModel(self.state_size, self.action_size)  # global network
+        self.global_model = _ActorCriticModel(self.state_size, self.action_size)  # global network
         self.global_model(tf.convert_to_tensor(value=np.random.random((1, self.state_size)), dtype=tf.float32))
 
     def train(self, max_eps, update_freq, gamma):
 
         res_queue = Queue()
 
-        workers = [Worker(self.env_factory, max_eps, update_freq, gamma, self.state_size, self.action_size, self.global_model, self.opt, 
+        workers = [_Worker(self.env_factory, max_eps, update_freq, gamma, self.state_size, self.action_size, self.global_model, self.opt, 
             res_queue, i, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
 
         for i, worker in enumerate(workers):
@@ -152,7 +152,7 @@ class A3CAgent:
         finally:
             env.close()
 
-class Memory:
+class _Memory:
     def __init__(self):
         self.states = []
         self.actions = []
@@ -168,7 +168,7 @@ class Memory:
         self.actions = []
         self.rewards = []
 
-class Worker(threading.Thread):
+class _Worker(threading.Thread):
 
     # Set up global variables across different threads
     global_episode = 0
@@ -179,7 +179,7 @@ class Worker(threading.Thread):
 
     def __init__(self, env_factory, max_eps, update_freq, gamma, state_size, action_size, global_model, opt, result_queue, idx, save_dir='/tmp'):
 
-        super(Worker, self).__init__()
+        super(_Worker, self).__init__()
 
         self.max_eps = max_eps
         self.update_freq = update_freq
@@ -190,7 +190,7 @@ class Worker(threading.Thread):
         self.result_queue = result_queue
         self.global_model = global_model
         self.opt = opt
-        self.local_model = ActorCriticModel(self.state_size, self.action_size)
+        self.local_model = _ActorCriticModel(self.state_size, self.action_size)
         self.worker_idx = idx
         self.game_name = env_factory.getName()
         self.env = env_factory.createEnvironment().unwrapped
@@ -199,8 +199,8 @@ class Worker(threading.Thread):
 
     def run(self):
         total_step = 1
-        mem = Memory()
-        while Worker.global_episode < self.max_eps:
+        mem = _Memory()
+        while _Worker.global_episode < self.max_eps:
             current_state = self.env.reset()
             mem.clear()
             ep_reward = 0.
@@ -239,16 +239,16 @@ class Worker(threading.Thread):
                     time_count = 0
 
                     if done:    # done and print information
-                        Worker.global_moving_average_reward = \
-                            report(Worker.global_episode, self.max_eps, ep_reward, self.worker_idx, Worker.global_moving_average_reward, self.result_queue, self.ep_loss, ep_steps)
+                        _Worker.global_moving_average_reward = \
+                            _report(_Worker.global_episode, self.max_eps, ep_reward, self.worker_idx, _Worker.global_moving_average_reward, self.result_queue, self.ep_loss, ep_steps)
                         # We must use a lock to save our model and to print to prevent data races.
-                        if ep_reward > Worker.best_score:
-                            with Worker.save_lock:
+                        if ep_reward > _Worker.best_score:
+                            with _Worker.save_lock:
                                 filename = os.path.join(self.save_dir, 'model_{}.h5'.format(self.game_name))
                                 print('Saving best model with episode score {} to {}'.format(ep_reward, filename))
                                 self.global_model.save_weights(filename) 
-                                Worker.best_score = ep_reward
-                        Worker.global_episode += 1
+                                _Worker.best_score = ep_reward
+                        _Worker.global_episode += 1
                 ep_steps += 1
 
                 time_count += 1
