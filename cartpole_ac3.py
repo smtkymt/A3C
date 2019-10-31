@@ -3,32 +3,10 @@ import os
 import argparse
 from queue import Queue
 import gym
-from a3c import A3CAgent, report
+from a3c import A3CAgent, run_random
 import matplotlib.pyplot as plt
 
 GAME_NAME = 'CartPole-v0'
-
-# Runs a random agent for baseline
-def run_random(env_factory, max_eps):
-    env = env_factory.createEnvironment()
-    global_moving_average_reward = 0
-    res_queue = Queue()
-    reward_avg = 0
-    for episode in range(max_eps):
-        done = False
-        env.reset()
-        reward_sum = 0.0
-        steps = 0
-        while not done:
-            # Sample randomly from the action space and step
-            _, reward, done, _ = env.step(env.action_space.sample())
-            steps += 1
-            reward_sum += reward
-        # Record statistics
-        global_moving_average_reward = report(episode, max_eps, reward_sum, 0, global_moving_average_reward, res_queue, 0, steps) 
-        reward_avg += reward_sum
-    final_avg = reward_avg / float(max_eps)
-    print("Average score across {} episodes: {}".format(max_eps, final_avg))
 
 # A factory class for generating gym environments
 class EnvironmentFactory:
@@ -44,6 +22,7 @@ class EnvironmentFactory:
     def getName(self):
 
         return self.name
+
 
 if __name__ == '__main__':
 

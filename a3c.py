@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
 import threading
 import multiprocessing
@@ -10,8 +10,31 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
+# Runs a random agent for baseline
+def run_random(env_factory, max_eps):
+    env = env_factory.createEnvironment()
+    global_moving_average_reward = 0
+    res_queue = Queue()
+    reward_avg = 0
+    for episode in range(max_eps):
+        done = False
+        env.reset()
+        reward_sum = 0.0
+        steps = 0
+        while not done:
+            # Sample randomly from the action space and step
+            _, reward, done, _ = env.step(env.action_space.sample())
+            steps += 1
+            reward_sum += reward
+        # Record statistics
+        global_moving_average_reward = report(episode, max_eps, reward_sum, 0, global_moving_average_reward, res_queue, 0, steps) 
+        reward_avg += reward_sum
+    final_avg = reward_avg / float(max_eps)
+    print('Average score across {} episodes: {}'.format(max_eps, final_avg))
+
+
 def report(episode, max_episodes, episode_reward, worker_idx, global_ep_reward, result_queue, total_loss, num_steps):
-    """Helper function to store score and print statistics.
+    '''Helper function to store score and print statistics.
 
     Arguments:
         episode: Current episode
@@ -22,18 +45,18 @@ def report(episode, max_episodes, episode_reward, worker_idx, global_ep_reward, 
         result_queue: Queue storing the moving average of the scores
         total_loss: The total loss accumualted over the current episode
         num_steps: The number of steps the episode took to complete
-    """
+    '''
     if global_ep_reward == 0:
         global_ep_reward = episode_reward
     else:
         global_ep_reward = global_ep_reward * 0.99 + episode_reward * 0.01
     print(
-            f"Episode: {episode:4d} / {max_episodes:4d} | "
-            f"Moving Average Reward: {int(global_ep_reward):3d} | "
-            f"Episode Reward: {int(episode_reward):4d} | "
-            f"Loss: {int(total_loss / float(num_steps) * 1000) / 1000:6.3f} | "
-            f"Steps: {num_steps:4d} | "
-            f"Worker: {worker_idx}"
+            f'Episode: {episode:4d} / {max_episodes:4d} | '
+            f'Moving Average Reward: {int(global_ep_reward):3d} | '
+            f'Episode Reward: {int(episode_reward):4d} | '
+            f'Loss: {int(total_loss / float(num_steps) * 1000) / 1000:6.3f} | '
+            f'Steps: {num_steps:4d} | '
+            f'Worker: {worker_idx}'
     )
     result_queue.put(global_ep_reward)
     return global_ep_reward
@@ -82,10 +105,10 @@ class A3CAgent:
         res_queue = Queue()
 
         workers = [Worker(self.env_factory, max_eps, update_freq, gamma, self.state_size, self.action_size, self.global_model, self.opt, 
-            res_queue, i, game_name=self.game_name, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
+            res_queue, i, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
 
         for i, worker in enumerate(workers):
-            print("Starting worker {}".format(i))
+            print('Starting worker {}'.format(i))
             worker.start()
 
         moving_average_rewards = []  # record episode reward to plot
@@ -122,10 +145,10 @@ class A3CAgent:
                 action = np.argmax(policy)
                 state, reward, done, _ = env.step(action)
                 reward_sum += reward
-                print("{}. Reward: {}, action: {}".format(step_counter, reward_sum, action))
+                print('{}. Reward: {}, action: {}'.format(step_counter, reward_sum, action))
                 step_counter += 1
         except KeyboardInterrupt:
-            print("Received Keyboard Interrupt. Shutting down.")
+            print('Received Keyboard Interrupt. Shutting down.')
         finally:
             env.close()
 
@@ -154,7 +177,7 @@ class Worker(threading.Thread):
     best_score = 0
     save_lock = threading.Lock()
 
-    def __init__(self, env_factory, max_eps, update_freq, gamma, state_size, action_size, global_model, opt, result_queue, idx, game_name='CartPole-v0', save_dir='/tmp'):
+    def __init__(self, env_factory, max_eps, update_freq, gamma, state_size, action_size, global_model, opt, result_queue, idx, save_dir='/tmp'):
 
         super(Worker, self).__init__()
 
@@ -169,7 +192,7 @@ class Worker(threading.Thread):
         self.opt = opt
         self.local_model = ActorCriticModel(self.state_size, self.action_size)
         self.worker_idx = idx
-        self.game_name = game_name
+        self.game_name = env_factory.getName()
         self.env = env_factory.createEnvironment().unwrapped
         self.save_dir = save_dir
         self.ep_loss = 0.0
@@ -221,8 +244,9 @@ class Worker(threading.Thread):
                         # We must use a lock to save our model and to print to prevent data races.
                         if ep_reward > Worker.best_score:
                             with Worker.save_lock:
-                                print('Saving best model to {}, episode score: {}'.format(self.save_dir, ep_reward))
-                                self.global_model.save_weights( os.path.join(self.save_dir, 'model_{}.h5'.format(self.game_name)))
+                                filename = os.path.join(self.save_dir, 'model_{}.h5'.format(self.game_name))
+                                print('Saving best model with episode score {} to {}'.format(ep_reward, filename))
+                                self.global_model.save_weights(filename) 
                                 Worker.best_score = ep_reward
                         Worker.global_episode += 1
                 ep_steps += 1
@@ -266,3 +290,4 @@ class Worker(threading.Thread):
         policy_loss -= 0.01 * entropy
         total_loss = tf.reduce_mean(input_tensor=(0.5 * value_loss + policy_loss))
         return total_loss
+    
