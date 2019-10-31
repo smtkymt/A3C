@@ -82,7 +82,7 @@ class A3CAgent:
 
         res_queue = Queue()
 
-        workers = [Worker(max_eps, update_freq, gamma, self.state_size, self.action_size, self.global_model, self.opt, 
+        workers = [Worker(self.env_factory, max_eps, update_freq, gamma, self.state_size, self.action_size, self.global_model, self.opt, 
             res_queue, i, game_name=self.game_name, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
 
         for i, worker in enumerate(workers):
@@ -155,7 +155,7 @@ class Worker(threading.Thread):
     best_score = 0
     save_lock = threading.Lock()
 
-    def __init__(self, max_eps, update_freq, gamma, state_size, action_size, global_model, opt, result_queue, idx, game_name='CartPole-v0', save_dir='/tmp'):
+    def __init__(self, env_factory, max_eps, update_freq, gamma, state_size, action_size, global_model, opt, result_queue, idx, game_name='CartPole-v0', save_dir='/tmp'):
 
         super(Worker, self).__init__()
 
@@ -222,8 +222,7 @@ class Worker(threading.Thread):
                         # We must use a lock to save our model and to print to prevent data races.
                         if ep_reward > Worker.best_score:
                             with Worker.save_lock:
-                                print("Saving best model to {}, "
-                                            "episode score: {}".format(self.save_dir, ep_reward))
+                                print('Saving best model to {}, episode score: {}'.format(self.save_dir, ep_reward))
                                 self.global_model.save_weights( os.path.join(self.save_dir, 'model_{}.h5'.format(self.game_name)))
                                 Worker.best_score = ep_reward
                         Worker.global_episode += 1
