@@ -5,9 +5,6 @@ import gym
 from a3c import A3CAgent, run_random
 import matplotlib.pyplot as plt
 
-#GAME_NAME = 'CartPole-v0'
-GAME_NAME = 'LunarLander-v2'
-
 # A factory class for generating gym environments
 class EnvironmentFactory:
 
@@ -26,8 +23,9 @@ class EnvironmentFactory:
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Run A3C algorithm on the game Cartpole.')
-    parser.add_argument('--algorithm', default='a3c', type=str, help='Choose between \'a3c\' and \'random\'.')
+    parser = argparse.ArgumentParser(description='Run A3C algorithm on a gym game.')
+    parser.add_argument('--game', default='CartPole-v0', type=str, help='Choose game.')
+    parser.add_argument('--algorithm', default='ac3', type=str, help='Choose between \'a3c\' and \'random\'.')
     parser.add_argument('--train', dest='train', action='store_true', help='Train our model.')
     parser.add_argument('--lr', default=0.001, help='Learning rate for the shared optimizer.')
     parser.add_argument('--update-freq', default=20, type=int, help='How often to update the global model.')
@@ -37,7 +35,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    factory = EnvironmentFactory(GAME_NAME)
+    factory = EnvironmentFactory(args.game)
 
     if args.algorithm == 'random':
 
@@ -54,7 +52,7 @@ if __name__ == '__main__':
             plt.plot(moving_average_rewards)
             plt.ylabel('Moving average ep reward')
             plt.xlabel('Step')
-            plt.savefig(os.path.join(args.save_dir, '{} Moving Average.png'.format(GAME_NAME)))
+            plt.savefig(os.path.join(args.save_dir, '{} Moving Average.png'.format(args.game)))
             plt.show()
 
         else:
