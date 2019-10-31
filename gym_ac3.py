@@ -5,22 +5,6 @@ import gym
 from a3c import A3CAgent, run_random
 import matplotlib.pyplot as plt
 
-# A factory class for generating gym environments
-class EnvironmentFactory:
-
-    def __init__(self, name):
-
-        self.name = name
-
-    def createEnvironment(self):
-
-        return gym.make(self.name)
-
-    def getName(self):
-
-        return self.name
-
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Run A3C algorithm on a gym game.')
@@ -35,15 +19,13 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    factory = EnvironmentFactory(args.game)
-
     if args.algorithm == 'random':
 
-        run_random(factory, args.max_eps)
+        run_random(args.game, args.max_eps)
 
     else:
 
-        agent = A3CAgent(factory, args.save_dir, args.lr)
+        agent = A3CAgent(args.game, args.save_dir, args.lr)
             
         if args.train:
 

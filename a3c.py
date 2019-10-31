@@ -4,6 +4,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ''
 import threading
 import multiprocessing
 import numpy as np
+import gym
 from queue import Queue
 
 import tensorflow as tf
@@ -11,8 +12,8 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 # Runs a random agent for baseline
-def run_random(env_factory, max_eps):
-    env = env_factory.createEnvironment()
+def run_random(game_name, max_eps):
+    env = gym.make(game_name)
     global_moving_average_reward = 0
     res_queue = Queue()
     reward_avg = 0
@@ -83,17 +84,16 @@ class _ActorCriticModel(keras.Model):
 
 class A3CAgent:
 
-    def __init__(self, env_factory, save_dir, lr):
+    def __init__(self, game_name, save_dir, lr):
 
-        self.env_factory = env_factory
-        self.game_name = env_factory.getName()
+        self.game_name = game_name
         self.save_dir = save_dir
         if not os.path.exists(save_dir):
             os.makedirs(save_dir)
 
-        env = env_factory.createEnvironment() 
-        self.state_size = env.observation_space.shape[0]
-        self.action_size = env.action_space.n
+        self.env = gym.make(game_name)
+        self.state_size = self.env.observation_space.shape[0]
+        self.action_size = self.env.action_space.n
         self.opt = tf.compat.v1.train.AdamOptimizer(lr, use_locking=True)
         print(self.state_size, self.action_size)
 
@@ -104,7 +104,7 @@ class A3CAgent:
 
         res_queue = Queue()
 
-        workers = [_Worker(self.env_factory, max_eps, update_freq, gamma, self.state_size, self.action_size, self.global_model, self.opt, 
+        workers = [_Worker(self.game_name, max_eps, update_freq, gamma, self.state_size, self.action_size, self.global_model, self.opt, 
             res_queue, i, save_dir=self.save_dir) for i in range(multiprocessing.cpu_count())]
 
         for i, worker in enumerate(workers):
@@ -123,7 +123,7 @@ class A3CAgent:
         return moving_average_rewards
 
     def play(self):
-        env = self.env_factory.createEnvironment().unwrapped
+        env = self.env.unwrapped
         state = env.reset()
         model = self.global_model
         model_path = os.path.join(self.save_dir, 'model_{}.h5'.format(self.game_name))
@@ -177,7 +177,7 @@ class _Worker(threading.Thread):
     best_score = 0
     save_lock = threading.Lock()
 
-    def __init__(self, env_factory, max_eps, update_freq, gamma, state_size, action_size, global_model, opt, result_queue, idx, save_dir='/tmp'):
+    def __init__(self, game_name, max_eps, update_freq, gamma, state_size, action_size, global_model, opt, result_queue, idx, save_dir='/tmp'):
 
         super(_Worker, self).__init__()
 
@@ -192,8 +192,8 @@ class _Worker(threading.Thread):
         self.opt = opt
         self.local_model = _ActorCriticModel(self.state_size, self.action_size)
         self.worker_idx = idx
-        self.game_name = env_factory.getName()
-        self.env = env_factory.createEnvironment().unwrapped
+        self.game_name = game_name
+        self.env = gym.make(game_name)
         self.save_dir = save_dir
         self.ep_loss = 0.0
 
@@ -210,9 +210,7 @@ class _Worker(threading.Thread):
             time_count = 0
             done = False
             while not done:
-                logits, _ = self.local_model(
-                        tf.convert_to_tensor(value=current_state[None, :],
-                                                                 dtype=tf.float32))
+                logits, _ = self.local_model( tf.convert_to_tensor(value=current_state[None, :], dtype=tf.float32))
                 probs = tf.nn.softmax(logits)
 
                 action = np.random.choice(self.action_size, p=probs.numpy()[0])
@@ -290,4 +288,4 @@ class _Worker(threading.Thread):
         policy_loss -= 0.01 * entropy
         total_loss = tf.reduce_mean(input_tensor=(0.5 * value_loss + policy_loss))
         return total_loss
-    
+
