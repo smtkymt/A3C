@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import os
 import argparse
-from queue import Queue
 import gym
 from a3c import A3CAgent, run_random
 import matplotlib.pyplot as plt
