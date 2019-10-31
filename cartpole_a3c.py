@@ -5,7 +5,8 @@ import gym
 from a3c import A3CAgent, run_random
 import matplotlib.pyplot as plt
 
-GAME_NAME = 'CartPole-v0'
+#GAME_NAME = 'CartPole-v0'
+GAME_NAME = 'LunarLander-v2'
 
 # A factory class for generating gym environments
 class EnvironmentFactory:
