@@ -7,3 +7,11 @@ I adapted his [CartPole code](https://github.com/tensorflow/models/blob/master/r
 
 2. Added support for games other than CartPole.
 
+##Installation
+
+On Linux, you should run the following commands using sudo.
+
+First you'll want to make sure your Python package installer (pip) is up-to-date
+
+```pip3 install --upgrade pip```
+
