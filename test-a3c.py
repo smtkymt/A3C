@@ -9,7 +9,7 @@ Copyright (C) Simon D. Levy 2019
 MIT License
 '''
 
-from a3c import A3CAgent
+from a3c import A3CAgent, run_random
 
 import argparse
 import matplotlib.pyplot as plt
