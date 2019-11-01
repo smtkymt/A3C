@@ -12,7 +12,6 @@ MIT License
 import os
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
-import argparse
 import threading
 import multiprocessing
 import numpy as np
@@ -22,8 +21,6 @@ from queue import Queue
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-
-import matplotlib.pyplot as plt
 
 # Runs a random agent for baseline
 def run_random(game_name, max_eps):
@@ -94,7 +91,6 @@ class _ActorCriticModel(keras.Model):
         v1 = self.dense2(inputs)
         values = self.values(v1)
         return logits, values
-
 
 class A3CAgent:
 
@@ -257,7 +253,7 @@ class _Worker(threading.Thread):
                         if ep_reward > _Worker.best_score:
                             with _Worker.save_lock:
                                 filename = os.path.join(self.save_dir, 'model_{}.h5'.format(self.game_name))
-                                print('Saving best model with episode score {} to {}'.format(ep_reward, filename))
+                                print('Saving best model with episode score {:.2f} to {}'.format(ep_reward, filename))
                                 self.global_model.save_weights(filename) 
                                 _Worker.best_score = ep_reward
                         _Worker.global_episode += 1
@@ -302,41 +298,3 @@ class _Worker(threading.Thread):
         policy_loss -= 0.01 * entropy
         total_loss = tf.reduce_mean(input_tensor=(0.5 * value_loss + policy_loss))
         return total_loss
-
-
-if __name__ == '__main__':
-
-    parser = argparse.ArgumentParser(description='Run A3C algorithm on a gym game.')
-    parser.add_argument('--game', default='CartPole-v0', type=str, help='Choose game.')
-    parser.add_argument('--algorithm', default='ac3', type=str, help='Choose between \'a3c\' and \'random\'.')
-    parser.add_argument('--train', dest='train', action='store_true', help='Train our model.')
-    parser.add_argument('--lr', default=0.001, help='Learning rate for the shared optimizer.')
-    parser.add_argument('--update-freq', default=20, type=int, help='How often to update the global model.')
-    parser.add_argument('--max-eps', default=1000, type=int, help='Global maximum number of episodes to run.')
-    parser.add_argument('--gamma', default=0.99, help='Discount factor of rewards.')
-    parser.add_argument('--save-dir', default='/tmp/', type=str, help='Directory in which to save the model.') 
-
-    args = parser.parse_args()
-
-    if args.algorithm == 'random':
-
-        run_random(args.game, args.max_eps)
-
-    else:
-
-        agent = A3CAgent(args.game, args.save_dir, args.lr)
-            
-        if args.train:
-
-            moving_average_rewards = agent.train(args.max_eps, args.update_freq, args.gamma)
-
-            plt.plot(moving_average_rewards)
-            plt.ylabel('Moving average ep reward')
-            plt.xlabel('Step')
-            plt.title(args.game)
-            plt.savefig(os.path.join(args.save_dir, '{} Moving Average.png'.format(args.game)))
-            plt.show()
-
-        else:
-
-            agent.play()
