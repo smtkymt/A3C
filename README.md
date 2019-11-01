@@ -30,6 +30,6 @@ If you're running Windows 10 and can't install gym that way, you can either do a
 [more complicated](https://medium.com/@sayanmndl21/install-openai-gym-with-box2d-and-mujoco-in-windows-10-e25ee9b5c1d5)
 install, or opt out of the Box2D support:
 
-```pip3 install gym[box2d]```
+```pip3 install gym```
 
 Without Box2D I was able to run the default CartPole example, but not LunarLander.
