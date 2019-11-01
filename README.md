@@ -1,4 +1,4 @@
-<img src="lunar.gif">
+<img src="lunar.gif" width=500>
 
 This repository contains a Python module and test code for running the Asynchronous Adavantage Actor Critic (A3C) algorithm 
 for Deep Reinforcement Learning.  After reading Raymond Yuan's excellent A3C
