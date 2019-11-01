@@ -1,3 +1,5 @@
+<img src="lunar.gif" width=500>
+
 This repository contains a Python module and test code for running the Asynchronous Adavantage Actor Critic (A3C) algorithm 
 for Deep Reinforcement Learning.  After reading Raymond Yuan's excellent A3C
 [tutorial](https://medium.com/tensorflow/deep-reinforcement-learning-playing-cartpole-through-asynchronous-advantage-actor-critic-a3c-7eab2eea5296),
@@ -47,3 +49,12 @@ you can do
 
 ```python3 run-a3c.py```
 
+## Trying other games
+
+I generated the Lunar Lander movie above by training for 10,000 episodes:
+
+```python3 run-a3c.py --game=LunarLander-v2 --train --max-eps=10000```
+
+and then running the game in test mode to display the movie:
+
+```python3 run-a3c.py --game=LunarLander-v2```
