@@ -42,4 +42,8 @@ The easiest way to get started is to run the default training and testing exampl
 
 ```python3 test-a3c.py --train```
 
-This will train on 1000 episodes of the [Cart Pole v0](https://github.com/openai/gym/wiki/CartPole-v0) game.
+This will train on 1000 episodes of the [Cart Pole v0](https://github.com/openai/gym/wiki/CartPole-v0) game. To see how well your training went,
+you can do
+
+```python3 test-a3c.py```
+
