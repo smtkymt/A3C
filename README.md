@@ -40,10 +40,10 @@ Without Box2D I was able to run the default CartPole example, but not LunarLande
 
 The easiest way to get started is to run the default training and testing examples:
 
-```python3 test-a3c.py --train```
+```python3 run-a3c.py --train```
 
 This will train on 1000 episodes of the [Cart Pole v0](https://github.com/openai/gym/wiki/CartPole-v0) game. To see how well your training went,
 you can do
 
-```python3 test-a3c.py```
+```python3 run-a3c.py```
 
