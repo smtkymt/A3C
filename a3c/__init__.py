@@ -157,7 +157,7 @@ class A3CAgent:
                 action = np.argmax(policy)
                 state, reward, done, _ = env.step(action)
                 reward_sum += reward
-                print('{}. Reward: {}, action: {}'.format(step_counter, reward_sum, action))
+                print('{:4d}. Reward: {:+8.2f}, action: {}'.format(step_counter, reward_sum, action))
                 step_counter += 1
         except KeyboardInterrupt:
             print('Received Keyboard Interrupt. Shutting down.')
