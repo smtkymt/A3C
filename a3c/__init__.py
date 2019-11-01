@@ -22,8 +22,10 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
-# Runs a random agent for baseline
 def run_random(game_name, max_eps):
+    '''
+    Runs a random agent for baseline
+    '''
     env = gym.make(game_name)
     global_moving_average_reward = 0
     res_queue = Queue()
