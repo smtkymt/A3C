@@ -11,7 +11,8 @@ I adapted his [CartPole code](https://github.com/tensorflow/models/blob/master/r
 
 (On Linux, you should run the following commands using sudo.)
 
-First you'll want to make sure your Python package installer (pip) is up-to-date:
+First you'll want to make sure your Python package installer (pip) is up-to-date, so that you get TensorFlow 2.0
+instead of an earlier version:
 
 ```pip3 install --upgrade pip```
 
