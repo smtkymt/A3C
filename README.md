@@ -11,7 +11,14 @@ I adapted his [CartPole code](https://github.com/tensorflow/models/blob/master/r
 
 On Linux, you should run the following commands using sudo.
 
-First you'll want to make sure your Python package installer (pip) is up-to-date
+First you'll want to make sure your Python package installer (pip) is up-to-date:
 
 ```pip3 install --upgrade pip```
+
+Next install TensorFlow 2.0:
+
+```pip3 install tensorflow```
+
+Because the A3C algorithm uses CPU parallelism rather than GPU, I did not install tensorflow-gpu for this project.
+
 
