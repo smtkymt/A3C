@@ -20,7 +20,7 @@ Next install TensorFlow 2.0:
 
 ```pip3 install tensorflow```
 
-Because the A3C algorithm uses CPU parallelism rather than GPU, I did not install tensorflow-gpu for this project.
+(Because the A3C algorithm uses CPU parallelism rather than GPU, I did not install tensorflow-gpu for this project.)
 
 Finally, install the [OpenAI Gym](https://gym.openai.com) package with support for Box2D:
 
