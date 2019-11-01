@@ -1,3 +1,5 @@
+<img src="lunar.gif">
+
 This repository contains a Python module and test code for running the Asynchronous Adavantage Actor Critic (A3C) algorithm 
 for Deep Reinforcement Learning.  After reading Raymond Yuan's excellent A3C
 [tutorial](https://medium.com/tensorflow/deep-reinforcement-learning-playing-cartpole-through-asynchronous-advantage-actor-critic-a3c-7eab2eea5296),
