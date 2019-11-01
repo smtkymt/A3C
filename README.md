@@ -7,7 +7,7 @@ I adapted his [CartPole code](https://github.com/tensorflow/models/blob/master/r
 
 2. Added support for games other than CartPole.
 
-##Installation
+## Installation
 
 On Linux, you should run the following commands using sudo.
 
