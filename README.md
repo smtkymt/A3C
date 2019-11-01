@@ -53,8 +53,8 @@ you can do
 
 I generated the Lunar Lander movie above by training for 10,000 episodes:
 
-```python run-ac3.py --game=LunarLander-v2 --train --max-eps=10000```
+```python run-a3c.py --game=LunarLander-v2 --train --max-eps=10000```
 
 and then running the game in test mode to display the movie:
 
-```python run-ac3.py --game=LunarLander-v2```
+```python run-a3c.py --game=LunarLander-v2```
