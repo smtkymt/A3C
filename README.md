@@ -9,7 +9,7 @@ I adapted his [CartPole code](https://github.com/tensorflow/models/blob/master/r
 
 ## Installation
 
-On Linux, you should run the following commands using sudo.
+(On Linux, you should run the following commands using sudo.)
 
 First you'll want to make sure your Python package installer (pip) is up-to-date:
 
