@@ -9,7 +9,7 @@ I adapted his [CartPole code](https://github.com/tensorflow/models/blob/master/r
 
 3. Made it a Python package.
 
-## Installation
+## Prerequisites
 
 (On Linux, you should run the following commands using sudo.)
 
@@ -35,3 +35,11 @@ install, or opt out of the Box2D support:
 ```pip3 install gym```
 
 Without Box2D I was able to run the default CartPole example, but not LunarLander.
+
+## Getting started
+
+The easiest way to get started is to run the default training and testing examples:
+
+```python3 test-a3c.py --train```
+
+This will train on 1000 episodes of the [Cart Pole v0](https://github.com/openai/gym/wiki/CartPole-v0) game.
