@@ -71,7 +71,7 @@ def _report(episode, max_episodes, episode_reward, worker_idx, global_ep_reward,
             f'Episode Reward: {int(episode_reward):4d} | '
             f'Loss: {int(total_loss / float(num_steps) * 1000) / 1000:6.3f} | '
             f'Steps: {num_steps:4d} | '
-            f'_Worker: {worker_idx}'
+            f'Worker: {worker_idx}'
     )
     result_queue.put(global_ep_reward)
     return global_ep_reward
